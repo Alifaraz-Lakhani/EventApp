@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Dashboard</title>
+</head>
+<body>
+    <h2>Admin Dashboard</h2>
+
+    <a href="/admin/event/add">Add New Event</a>
+    <br><br>
+
+    <table border="1" cellpadding="8">
+        <tr>
+            <th>Title</th>
+            <th>Category</th>
+            <th>Date & Time</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+
+        {% for event in events %}
+        <tr>
+            <td>{{ event[1] }}</td>
+            <td>{{ event[2] }}</td>
+            <td>{{ event[3] }}</td>
+            <td>
+                {% if event[4] %}
+                    Active
+                {% else %}
+                    Deleted
+                {% endif %}
+            </td>
+            <td>
+                {% if event[4] %}
+                    <a href="/admin/event/edit/{{ event[0] }}">Edit</a>
+
+                    <form action="/admin/event/delete/{{ event[0] }}" method="POST" style="display:inline;">
+                        <button type="submit">Delete</button>
+                    </form>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <br>
+    <a href="/login">Logout</a>
+</body>
+</html>

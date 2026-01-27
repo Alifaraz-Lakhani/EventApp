@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Event</title>
+</head>
+<body>
+    <h2>Edit Event</h2>
+
+    <form method="POST">
+        <label>Title:</label><br>
+        <input type="text" name="title" value="{{ event[1] }}" required><br><br>
+
+        <label>Description:</label><br>
+        <textarea name="description">{{ event[2] }}</textarea><br><br>
+
+        <label>Category:</label><br>
+        <select name="category" required>
+            <option value="{{ event[3] }}">{{ event[3] }}</option>
+            <option value="Hackathon">Hackathon</option>
+            <option value="Workshop">Workshop</option>
+            <option value="Seminar">Seminar</option>
+            <option value="Web Development">Web Development</option>
+            <option value="AI / ML">AI / ML</option>
+            <option value="IoT">IoT</option>
+            <option value="Cybersecurity">Cybersecurity</option>
+            <option value="General">General</option>
+        </select><br><br>
+
+        <label>Mode:</label><br>
+        <select name="mode">
+            <option value="{{ event[4] }}">{{ event[4] }}</option>
+            <option value="online">Online</option>
+            <option value="offline">Offline</option>
+            <option value="hybrid">Hybrid</option>
+        </select><br><br>
+
+        <label>Date & Time:</label><br>
+        <input type="datetime-local" name="event_datetime"
+               value="{{ event[5].strftime('%Y-%m-%dT%H:%M') }}" required><br><br>
+
+        <label>Team Size:</label><br>
+        <input type="number" name="team_size" value="{{ event[6] }}" min="1" required><br><br>
+
+        <button type="submit">Update Event</button>
+    </form>
+
+    <br>
+    <a href="/admin/">Back</a>
+</body>
+</html>

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student Dashboard</title>
+</head>
+<body>
+    <h2>Welcome, {{ session['uid'] }}</h2>
+
+    <h3>Upcoming Events</h3>
+
+    {% if events %}
+        <table border="1" cellpadding="8">
+            <tr>
+                <th>Title</th>
+                <th>Category</th>
+                <th>Mode</th>
+                <th>Date & Time</th>
+                <th>Team Size</th>
+                <th>Action</th>
+            </tr>
+
+            {% for event in events %}
+            <tr>
+                <td>{{ event[1] }}</td>
+                <td>{{ event[2] }}</td>
+                <td>{{ event[3] }}</td>
+                <td>{{ event[4] }}</td>
+                <td>{{ event[5] }}</td>
+                <td>
+                    {% if event[0] in joined_events %}
+                        <form action="/student/unenroll/{{ event[0] }}" method="POST">
+                            <button type="submit">Unenroll</button>
+                        </form>
+                    {% else %}
+                        <form action="/student/participate/{{ event[0] }}" method="POST">
+                            <button type="submit">Participate</button>
+                        </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <p>No upcoming events.</p>
+    {% endif %}
+
+    <br>
+    <a href="/login">Logout</a>
+</body>
+</html>
