@@ -1,50 +1,100 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Student Dashboard</title>
-</head>
-<body>
-    <h2>Welcome, {{ session['uid'] }}</h2>
+{% extends "base.html" %}
 
-    <h3>Upcoming Events</h3>
+{% block title %}Dashboard — EventApp{% endblock %}
 
-    {% if events %}
-        <table border="1" cellpadding="8">
-            <tr>
-                <th>Title</th>
-                <th>Category</th>
-                <th>Mode</th>
-                <th>Date & Time</th>
-                <th>Team Size</th>
-                <th>Action</th>
-            </tr>
+{% block content %}
+<div class="main-content">
+    <div class="page-header">
+        <h1>Welcome back, {{ session.get('name', session['uid']) }}! 👋</h1>
+        <p>Discover upcoming events and find your next opportunity</p>
+    </div>
 
-            {% for event in events %}
-            <tr>
-                <td>{{ event[1] }}</td>
-                <td>{{ event[2] }}</td>
-                <td>{{ event[3] }}</td>
-                <td>{{ event[4] }}</td>
-                <td>{{ event[5] }}</td>
-                <td>
-                    {% if event[0] in joined_events %}
-                        <form action="/student/unenroll/{{ event[0] }}" method="POST">
-                            <button type="submit">Unenroll</button>
-                        </form>
-                    {% else %}
-                        <form action="/student/participate/{{ event[0] }}" method="POST">
-                            <button type="submit">Participate</button>
-                        </form>
-                    {% endif %}
-                </td>
-            </tr>
+    <!-- Interest Recommendations -->
+    {% if recommendations %}
+    <div class="rec-section">
+        <h3>🤖 Recommended For You</h3>
+        {% for rec in recommendations %}
+        <div class="score-bar-container">
+            <div class="score-bar-label">
+                <span>{{ rec[0] }}</span>
+                <span>{{ rec[1] }}% match</span>
+            </div>
+            <div class="score-bar">
+                <div class="score-bar-fill {% if rec[1] > 75 %}high{% endif %}" style="width: {{ rec[1] }}%"></div>
+            </div>
+        </div>
+        {% endfor %}
+
+        {% if recommended_events %}
+        <div class="card-grid" style="margin-top: 1rem;">
+            {% for event in recommended_events %}
+            <div class="card">
+                <div class="card-meta" style="margin-bottom: 0.5rem;">
+                    <span class="tag tag-category">{{ event[3] }}</span>
+                    <span class="tag tag-{{ event[4]|lower }}">{{ event[4] }}</span>
+                </div>
+                <div class="card-title">{{ event[1] }}</div>
+                <div class="card-desc">{{ event[2] or 'No description' }}</div>
+                <div class="card-meta">
+                    <span class="meta-item"><span class="icon">📅</span> {{ event[5].strftime('%b %d, %Y · %I:%M %p')
+                        }}</span>
+                    <span class="meta-item"><span class="icon">👥</span> Team of {{ event[6] }}</span>
+                </div>
+                <div class="card-actions">
+                    <form action="{{ url_for('student.participate', event_id=event[0]) }}" method="POST">
+                        <button type="submit" class="btn btn-primary btn-sm">✨ Participate</button>
+                    </form>
+                </div>
+            </div>
             {% endfor %}
-        </table>
-    {% else %}
-        <p>No upcoming events.</p>
+        </div>
+        {% endif %}
+    </div>
     {% endif %}
 
-    <br>
-    <a href="/login">Logout</a>
-</body>
-</html>
+    <!-- All Upcoming Events -->
+    <div class="section-header">
+        <h2>🗓️ Upcoming Events</h2>
+        <span class="text-muted text-sm">{{ events|length }} event{{ 's' if events|length != 1 }}</span>
+    </div>
+
+    {% if events %}
+    <div class="card-grid">
+        {% for event in events %}
+        <div class="card">
+            <div class="card-meta" style="margin-bottom: 0.5rem;">
+                <span class="tag tag-category">{{ event[3] }}</span>
+                <span class="tag tag-{{ event[4]|lower }}">{{ event[4] }}</span>
+            </div>
+            <div class="card-title">{{ event[1] }}</div>
+            <div class="card-desc">{{ event[2] or 'No description available' }}</div>
+            <div class="card-meta">
+                <span class="meta-item"><span class="icon">📅</span> {{ event[5].strftime('%b %d, %Y · %I:%M %p')
+                    }}</span>
+                <span class="meta-item"><span class="icon">👥</span> Team of {{ event[6] }}</span>
+            </div>
+            <div class="card-actions">
+                {% if event[0] in joined_events %}
+                <form action="{{ url_for('student.unenroll', event_id=event[0]) }}" method="POST">
+                    <button type="submit" class="btn btn-danger btn-sm">✕ Unenroll</button>
+                </form>
+                <a href="{{ url_for('teams.team_pool', event_id=event[0]) }}" class="btn btn-secondary btn-sm">🤝 Find
+                    Teammates</a>
+                {% else %}
+                <form action="{{ url_for('student.participate', event_id=event[0]) }}" method="POST">
+                    <button type="submit" class="btn btn-primary btn-sm">⚡ Participate</button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-state-icon">📭</div>
+        <h3>No upcoming events</h3>
+        <p>Check back later for new events!</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

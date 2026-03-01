@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="EventApp – Discover, participate, and team up for college events">
+    <title>{% block title %}EventApp{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block head %}{% endblock %}
+</head>
+
+<body>
+    {% if session.get('uid') %}
+    <nav class="navbar">
+        <a href="/" class="nav-brand">
+            <span class="nav-brand-icon">⚡</span>
+            EventApp
+        </a>
+
+        <ul class="nav-links">
+            {% if session.get('role') == 'admin' %}
+            <li><a href="{{ url_for('admin.admin_dashboard') }}"
+                    class="{% if request.endpoint == 'admin.admin_dashboard' %}active{% endif %}">
+                    <span>📊</span> <span class="link-text">Dashboard</span>
+                </a></li>
+            <li><a href="{{ url_for('admin.add_event') }}"
+                    class="{% if request.endpoint == 'admin.add_event' %}active{% endif %}">
+                    <span>➕</span> <span class="link-text">Add Event</span>
+                </a></li>
+            {% else %}
+            <li><a href="{{ url_for('student.dashboard') }}"
+                    class="{% if request.endpoint == 'student.dashboard' %}active{% endif %}">
+                    <span>🏠</span> <span class="link-text">Dashboard</span>
+                </a></li>
+            <li><a href="{{ url_for('student.my_events') }}"
+                    class="{% if request.endpoint == 'student.my_events' %}active{% endif %}">
+                    <span>🎯</span> <span class="link-text">My Events</span>
+                </a></li>
+            <li><a href="{{ url_for('notifications.list_notifications') }}"
+                    class="{% if request.endpoint == 'notifications.list_notifications' %}active{% endif %}">
+                    <span>🔔</span> <span class="link-text">Alerts</span>
+                    {% if notif_count is defined and notif_count > 0 %}
+                    <span class="notif-badge">{{ notif_count }}</span>
+                    {% endif %}
+                </a></li>
+            {% endif %}
+        </ul>
+
+        <div class="nav-user">
+            <div class="nav-avatar">{{ session.get('name', session['uid'])[0]|upper }}</div>
+            <span class="nav-user-name">{{ session.get('name', session['uid']) }}</span>
+            <a href="{{ url_for('auth.logout') }}" class="btn-logout">Logout</a>
+        </div>
+    </nav>
+    {% endif %}
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="toast-container">
+        {% for category, message in messages %}
+        <div class="toast toast-{{ category }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+
+    <footer class="footer">
+        &copy; 2026 EventApp &mdash; Centralizing College Events
+    </footer>
+
+    {% block scripts %}{% endblock %}
+
+    <script>
+        // Auto-remove toast messages
+        document.addEventListener('DOMContentLoaded', function () {
+            const toasts = document.querySelectorAll('.toast');
+            toasts.forEach(t => {
+                setTimeout(() => t.remove(), 4500);
+            });
+        });
+    </script>
+</body>
+
+</html>

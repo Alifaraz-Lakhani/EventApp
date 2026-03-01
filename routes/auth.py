@@ -1,4 +1,4 @@
-from flask import Blueprint, request, redirect, url_for, session, render_template
+from flask import Blueprint, request, redirect, url_for, session, render_template, flash
 from db import get_db_connection
 
 auth_bp = Blueprint("auth", __name__)
@@ -54,7 +54,10 @@ def login():
 
         # Store session
         session["uid"] = uid
+        session["name"] = name
         session["role"] = role
+
+        flash("Logged in successfully!", "success")
 
         # Redirect
         if role == "admin":
@@ -63,3 +66,10 @@ def login():
             return redirect(url_for("student.dashboard"))
 
     return render_template("login.html")
+
+
+@auth_bp.route("/logout")
+def logout():
+    session.clear()
+    flash("You have been logged out.", "info")
+    return redirect(url_for("auth.login"))

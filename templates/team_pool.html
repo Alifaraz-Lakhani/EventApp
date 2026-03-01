@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block title %}Team Pool — {{ event[1] }} — EventApp{% endblock %}
+
+{% block content %}
+<div class="main-content">
+    <div class="page-header">
+        <h1>🤝 Team Pool</h1>
+        <p>Find teammates for <strong>{{ event[1] }}</strong> — Team size: {{ event[2] }}</p>
+    </div>
+
+    <!-- Join / Leave Pool -->
+    {% if user_in_pool %}
+    <div style="margin-bottom: 1.5rem;">
+        <form action="{{ url_for('teams.leave_pool', event_id=event[0]) }}" method="POST" style="display:inline;">
+            <button type="submit" class="btn btn-danger">✕ Leave Team Pool</button>
+        </form>
+        <span class="text-muted text-sm" style="margin-left:0.75rem;">You're visible to others looking for
+            teammates</span>
+    </div>
+    {% else %}
+    <form action="{{ url_for('teams.join_pool', event_id=event[0]) }}" method="POST" class="join-form">
+        <div class="form-group">
+            <label>Your Skills</label>
+            <input type="text" name="skills" class="form-control" placeholder="Python, React, Design...">
+        </div>
+        <div class="form-group">
+            <label>Looking For</label>
+            <input type="text" name="looking_for_role" class="form-control" placeholder="Backend Dev, Designer...">
+        </div>
+        <div class="form-group">
+            <label>Team Size</label>
+            <input type="number" name="current_team_size" class="form-control" value="1" min="1" max="{{ event[2] }}">
+        </div>
+        <button type="submit" class="btn btn-primary">Join Pool</button>
+    </form>
+    {% endif %}
+
+    <!-- Incoming Team Requests -->
+    {% if incoming_requests %}
+    <div class="requests-section">
+        <h3 style="margin-bottom:1rem; font-size:1rem; font-weight:700;">📩 Incoming Requests</h3>
+        <div class="pool-list">
+            {% for req in incoming_requests %}
+            <div class="pool-card">
+                <div class="pool-avatar">{{ req[2][0]|upper }}</div>
+                <div class="pool-info">
+                    <div class="pool-name">{{ req[2] }}</div>
+                    <div class="text-muted text-sm">{{ req[4].strftime('%b %d · %I:%M %p') }}</div>
+                </div>
+                {% if req[3] == 'pending' %}
+                <form action="{{ url_for('teams.respond_request', request_id=req[0]) }}" method="POST"
+                    style="display:flex; gap:0.5rem;">
+                    <input type="hidden" name="action" value="accept">
+                    <button type="submit" class="btn btn-success btn-sm">✓ Accept</button>
+                </form>
+                <form action="{{ url_for('teams.respond_request', request_id=req[0]) }}" method="POST">
+                    <input type="hidden" name="action" value="reject">
+                    <button type="submit" class="btn btn-danger btn-sm">✕ Reject</button>
+                </form>
+                {% else %}
+                <span class="tag tag-{{ req[3] }}">{{ req[3]|title }}</span>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Available Teammates -->
+    <div class="section-header">
+        <h2>Available Teammates</h2>
+        <span class="text-muted text-sm">{{ pool|length }} in pool</span>
+    </div>
+
+    {% if pool %}
+    <div class="pool-list">
+        {% for member in pool %}
+        {% if member[1] != session['uid'] %}
+        <div class="pool-card">
+            <div class="pool-avatar">{{ member[2][0]|upper }}</div>
+            <div class="pool-info">
+                <div class="pool-name">{{ member[2] }}</div>
+                <div class="pool-skills">
+                    {% if member[3] %}
+                    {% for skill in member[3].split(',') %}
+                    <span class="skill-tag">{{ skill.strip() }}</span>
+                    {% endfor %}
+                    {% endif %}
+                </div>
+                {% if member[4] %}
+                <div class="text-muted text-sm mt-1">Looking for: {{ member[4] }}</div>
+                {% endif %}
+                <div class="text-muted text-sm">Team size: {{ member[5] }}/{{ event[2] }}</div>
+            </div>
+            {% if member[1] not in sent_requests %}
+            <form action="{{ url_for('teams.send_request', pool_id=member[0]) }}" method="POST">
+                <button type="submit" class="btn btn-primary btn-sm">🤝 Request</button>
+            </form>
+            {% else %}
+            <span class="tag tag-pending">Requested</span>
+            {% endif %}
+        </div>
+        {% endif %}
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-state-icon">👥</div>
+        <h3>No one in the pool yet</h3>
+        <p>Be the first to join and others will find you!</p>
+    </div>
+    {% endif %}
+
+    <div style="margin-top: 2rem;">
+        <a href="{{ url_for('student.dashboard') }}" class="btn btn-secondary">← Back to Dashboard</a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}My Events — EventApp{% endblock %}
+
+{% block content %}
+<div class="main-content">
+    <div class="page-header">
+        <h1>My Events 🎯</h1>
+        <p>Events you've registered for — with live countdown timers</p>
+    </div>
+
+    {% if events %}
+    <div class="card-grid">
+        {% for event in events %}
+        <div class="card">
+            <div class="card-meta" style="margin-bottom: 0.5rem;">
+                <span class="tag tag-category">{{ event[3] }}</span>
+                <span class="tag tag-{{ event[4]|lower }}">{{ event[4] }}</span>
+            </div>
+            <div class="card-title">{{ event[1] }}</div>
+            <div class="card-desc">{{ event[2] or 'No description' }}</div>
+            <div class="card-meta">
+                <span class="meta-item"><span class="icon">📅</span> {{ event[5].strftime('%b %d, %Y · %I:%M %p')
+                    }}</span>
+                <span class="meta-item"><span class="icon">👥</span> Team of {{ event[6] }}</span>
+            </div>
+
+            <div class="countdown" data-target="{{ event[5].isoformat() }}">
+                <div class="countdown-unit">
+                    <div class="countdown-value" data-days>--</div>
+                    <div class="countdown-label">Days</div>
+                </div>
+                <div class="countdown-unit">
+                    <div class="countdown-value" data-hours>--</div>
+                    <div class="countdown-label">Hours</div>
+                </div>
+                <div class="countdown-unit">
+                    <div class="countdown-value" data-mins>--</div>
+                    <div class="countdown-label">Mins</div>
+                </div>
+                <div class="countdown-unit">
+                    <div class="countdown-value" data-secs>--</div>
+                    <div class="countdown-label">Secs</div>
+                </div>
+            </div>
+
+            <div class="card-actions" style="margin-top: 1rem;">
+                <a href="{{ url_for('teams.team_pool', event_id=event[0]) }}" class="btn btn-secondary btn-sm">🤝 Find
+                    Teammates</a>
+                <form action="{{ url_for('student.unenroll', event_id=event[0]) }}" method="POST">
+                    <button type="submit" class="btn btn-danger btn-sm">✕ Unenroll</button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-state-icon">🎪</div>
+        <h3>No events yet</h3>
+        <p>Head to the <a href="{{ url_for('student.dashboard') }}">dashboard</a> to discover and join events!</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function updateCountdowns() {
+        document.querySelectorAll('.countdown').forEach(el => {
+            const target = new Date(el.dataset.target);
+            const now = new Date();
+            let diff = target - now;
+
+            if (diff <= 0) {
+                el.querySelector('[data-days]').textContent = '0';
+                el.querySelector('[data-hours]').textContent = '0';
+                el.querySelector('[data-mins]').textContent = '0';
+                el.querySelector('[data-secs]').textContent = '0';
+                return;
+            }
+
+            const days = Math.floor(diff / 86400000);
+            diff %= 86400000;
+            const hours = Math.floor(diff / 3600000);
+            diff %= 3600000;
+            const mins = Math.floor(diff / 60000);
+            diff %= 60000;
+            const secs = Math.floor(diff / 1000);
+
+            el.querySelector('[data-days]').textContent = days;
+            el.querySelector('[data-hours]').textContent = hours;
+            el.querySelector('[data-mins]').textContent = mins;
+            el.querySelector('[data-secs]').textContent = secs;
+        });
+    }
+
+    updateCountdowns();
+    setInterval(updateCountdowns, 1000);
+</script>
+{% endblock %}

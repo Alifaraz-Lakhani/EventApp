@@ -1,10 +1,10 @@
-from flask import Blueprint, session, redirect, url_for, render_template, request
+from flask import Blueprint, session, redirect, url_for, render_template, request, flash
 from db import get_db_connection
 from datetime import datetime
 
 admin_bp = Blueprint("admin", __name__)
 
-# Admin dashboard – list all events
+
 @admin_bp.route("/")
 def admin_dashboard():
     if "uid" not in session or session.get("role") != "admin":
@@ -14,9 +14,12 @@ def admin_dashboard():
     cur = conn.cursor()
 
     cur.execute("""
-        SELECT id, title, category, event_datetime, is_active
-        FROM events
-        ORDER BY event_datetime;
+        SELECT e.id, e.title, e.category, e.event_datetime, e.is_active,
+               COUNT(p.id) AS participant_count
+        FROM events e
+        LEFT JOIN participations p ON e.id = p.event_id
+        GROUP BY e.id
+        ORDER BY e.event_datetime;
     """)
     events = cur.fetchall()
 
@@ -24,6 +27,38 @@ def admin_dashboard():
     conn.close()
 
     return render_template("admin_dashboard.html", events=events)
+
+
+# Add event
+@admin_bp.route("/event/add", methods=["GET", "POST"])
+def add_event():
+    if "uid" not in session or session.get("role") != "admin":
+        return redirect(url_for("auth.login"))
+
+    if request.method == "POST":
+        title = request.form.get("title")
+        description = request.form.get("description")
+        category = request.form.get("category")
+        mode = request.form.get("mode")
+        event_datetime = request.form.get("event_datetime")
+        team_size = request.form.get("team_size")
+
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        cur.execute("""
+            INSERT INTO events (title, description, category, mode, event_datetime, team_size, created_by, is_active)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, TRUE);
+        """, (title, description, category, mode, event_datetime, team_size, session["uid"]))
+
+        conn.commit()
+        cur.close()
+        conn.close()
+
+        flash("Event created successfully!", "success")
+        return redirect(url_for("admin.admin_dashboard"))
+
+    return render_template("admin_add_event.html")
 
 
 # Edit event
@@ -51,17 +86,18 @@ def edit_event(event_id):
                 mode=%s,
                 event_datetime=%s,
                 team_size=%s
-            WHERE id=%s AND event_datetime > now();
+            WHERE id=%s;
         """, (title, description, category, mode, event_datetime, team_size, event_id))
 
         conn.commit()
         cur.close()
         conn.close()
 
+        flash("Event updated successfully!", "success")
         return redirect(url_for("admin.admin_dashboard"))
 
     # GET – load existing event
-    cur.execute("SELECT * FROM events WHERE id = %s;", (event_id,))
+    cur.execute("SELECT id, title, description, category, mode, event_datetime, team_size FROM events WHERE id = %s;", (event_id,))
     event = cur.fetchone()
 
     cur.close()
@@ -89,4 +125,5 @@ def delete_event(event_id):
     cur.close()
     conn.close()
 
+    flash("Event deleted.", "info")
     return redirect(url_for("admin.admin_dashboard"))

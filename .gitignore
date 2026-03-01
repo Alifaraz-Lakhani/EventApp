@@ -38,3 +38,9 @@ Thumbs.db
 .pytest_cache/
 .coverage
 htmlcov/
+
+# ===== Personal notes =====
+difficulties_journal.md
+
+# ===== Gemini agent =====
+.gemini/

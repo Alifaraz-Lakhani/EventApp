@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Notifications — EventApp{% endblock %}
+
+{% block content %}
+<div class="main-content">
+    <div class="page-header">
+        <div class="flex justify-between items-center">
+            <div>
+                <h1>Notifications 🔔</h1>
+                <p>Stay updated with event alerts, team requests, and recommendations</p>
+            </div>
+            {% if notifications %}
+            <form action="{{ url_for('notifications.mark_all_read') }}" method="POST">
+                <button type="submit" class="btn btn-secondary btn-sm">✓ Mark All Read</button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if notifications %}
+    <div class="notif-list">
+        {% for notif in notifications %}
+        <div class="notif-item {% if not notif[4] %}unread{% endif %}">
+            <span class="notif-icon">
+                {% if notif[3] == 'recommendation' %}🤖
+                {% elif notif[3] == 'team_request' %}🤝
+                {% elif notif[3] == 'team_response' %}📨
+                {% elif notif[3] == 'reminder' %}⏰
+                {% else %}🔔{% endif %}
+            </span>
+            <div class="notif-content">
+                <div class="notif-title">{{ notif[1] }}</div>
+                <div class="notif-message">{{ notif[2] }}</div>
+                <div class="notif-time">{{ notif[5].strftime('%b %d, %Y · %I:%M %p') }}</div>
+            </div>
+            {% if not notif[4] %}
+            <form action="{{ url_for('notifications.mark_read', notif_id=notif[0]) }}" method="POST">
+                <button type="submit" class="btn btn-secondary btn-sm" title="Mark as read">✓</button>
+            </form>
+            {% else %}
+            <span class="tag tag-active" style="font-size:0.65rem;">Read</span>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-state-icon">🔕</div>
+        <h3>All clear!</h3>
+        <p>No notifications yet. They'll appear here when you get event alerts or team requests.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,50 +1,70 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Edit Event</title>
-</head>
-<body>
-    <h2>Edit Event</h2>
+{% extends "base.html" %}
 
-    <form method="POST">
-        <label>Title:</label><br>
-        <input type="text" name="title" value="{{ event[1] }}" required><br><br>
+{% block title %}Edit Event — EventApp{% endblock %}
 
-        <label>Description:</label><br>
-        <textarea name="description">{{ event[2] }}</textarea><br><br>
+{% block content %}
+<div class="main-content">
+    <div class="page-header">
+        <h1>Edit Event ✏️</h1>
+        <p>Update the details for this event</p>
+    </div>
 
-        <label>Category:</label><br>
-        <select name="category" required>
-            <option value="{{ event[3] }}">{{ event[3] }}</option>
-            <option value="Hackathon">Hackathon</option>
-            <option value="Workshop">Workshop</option>
-            <option value="Seminar">Seminar</option>
-            <option value="Web Development">Web Development</option>
-            <option value="AI / ML">AI / ML</option>
-            <option value="IoT">IoT</option>
-            <option value="Cybersecurity">Cybersecurity</option>
-            <option value="General">General</option>
-        </select><br><br>
+    <div class="form-container">
+        <div class="card" style="padding: 2rem;">
+            <form method="POST">
+                <div class="form-group">
+                    <label for="title">Event Title</label>
+                    <input type="text" name="title" id="title" class="form-control" value="{{ event[1] }}" required>
+                </div>
 
-        <label>Mode:</label><br>
-        <select name="mode">
-            <option value="{{ event[4] }}">{{ event[4] }}</option>
-            <option value="online">Online</option>
-            <option value="offline">Offline</option>
-            <option value="hybrid">Hybrid</option>
-        </select><br><br>
+                <div class="form-group">
+                    <label for="description">Description</label>
+                    <textarea name="description" id="description" class="form-control">{{ event[2] }}</textarea>
+                </div>
 
-        <label>Date & Time:</label><br>
-        <input type="datetime-local" name="event_datetime"
-               value="{{ event[5].strftime('%Y-%m-%dT%H:%M') }}" required><br><br>
+                <div class="form-group">
+                    <label for="category">Category</label>
+                    <select name="category" id="category" class="form-control" required>
+                        <option value="Hackathon" {% if event[3]=='Hackathon' %}selected{% endif %}>Hackathon</option>
+                        <option value="Workshop" {% if event[3]=='Workshop' %}selected{% endif %}>Workshop</option>
+                        <option value="Seminar" {% if event[3]=='Seminar' %}selected{% endif %}>Seminar</option>
+                        <option value="Web Development" {% if event[3]=='Web Development' %}selected{% endif %}>Web
+                            Development</option>
+                        <option value="AI / ML" {% if event[3]=='AI / ML' %}selected{% endif %}>AI / ML</option>
+                        <option value="IoT" {% if event[3]=='IoT' %}selected{% endif %}>IoT</option>
+                        <option value="Cybersecurity" {% if event[3]=='Cybersecurity' %}selected{% endif %}>
+                            Cybersecurity</option>
+                        <option value="General" {% if event[3]=='General' %}selected{% endif %}>General</option>
+                    </select>
+                </div>
 
-        <label>Team Size:</label><br>
-        <input type="number" name="team_size" value="{{ event[6] }}" min="1" required><br><br>
+                <div class="form-group">
+                    <label for="mode">Mode</label>
+                    <select name="mode" id="mode" class="form-control">
+                        <option value="online" {% if event[4]=='online' %}selected{% endif %}>Online</option>
+                        <option value="offline" {% if event[4]=='offline' %}selected{% endif %}>Offline</option>
+                        <option value="hybrid" {% if event[4]=='hybrid' %}selected{% endif %}>Hybrid</option>
+                    </select>
+                </div>
 
-        <button type="submit">Update Event</button>
-    </form>
+                <div class="form-group">
+                    <label for="event_datetime">Date &amp; Time</label>
+                    <input type="datetime-local" name="event_datetime" id="event_datetime" class="form-control"
+                        value="{{ event[5].strftime('%Y-%m-%dT%H:%M') }}" required>
+                </div>
 
-    <br>
-    <a href="/admin/">Back</a>
-</body>
-</html>
+                <div class="form-group">
+                    <label for="team_size">Team Size</label>
+                    <input type="number" name="team_size" id="team_size" class="form-control" value="{{ event[6] }}"
+                        min="1" required>
+                </div>
+
+                <div class="flex gap-1" style="margin-top:1.5rem;">
+                    <button type="submit" class="btn btn-primary">💾 Update Event</button>
+                    <a href="{{ url_for('admin.admin_dashboard') }}" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

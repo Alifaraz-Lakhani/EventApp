@@ -1,25 +1,74 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-    <title>Login</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Login to EventApp – Discover college events">
+    <title>Login — EventApp</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
+
 <body>
-    <h2>Login</h2>
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="toast-container">
+        {% for category, message in messages %}
+        <div class="toast toast-{{ category }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
 
-    <form method="POST">
-        <label>UID:</label><br>
-        <input type="text" name="uid" required><br><br>
+    <div class="login-page">
+        <div class="login-card">
+            <div class="logo">
+                <h1>⚡ EventApp</h1>
+                <p>Discover &amp; participate in college events</p>
+            </div>
 
-        <label>Name:</label><br>
-        <input type="text" name="name" required><br><br>
+            <form method="POST" id="login-form">
+                <div class="form-group">
+                    <label for="uid">College UID</label>
+                    <input type="text" name="uid" id="uid" class="form-control"
+                        placeholder="Enter numeric UID for student, or ADM_XXXX for admin" required>
+                </div>
 
-        <label>Email:</label><br>
-        <input type="email" name="email" required><br><br>
+                <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <input type="text" name="name" id="name" class="form-control" placeholder="John Doe" required>
+                </div>
 
-        <label>Phone:</label><br>
-        <input type="text" name="phone" required><br><br>
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" name="email" id="email" class="form-control" placeholder="john@college.edu"
+                        required>
+                </div>
 
-        <button type="submit">Login</button>
-    </form>
+                <div class="form-group">
+                    <label for="phone">Phone Number</label>
+                    <input type="text" name="phone" id="phone" class="form-control" placeholder="+91 99999 99999"
+                        required>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-full" style="margin-top:0.5rem; padding:14px;">
+                    Sign In / Register →
+                </button>
+            </form>
+
+            <p class="text-center text-muted" style="margin-top:1.5rem; font-size:0.78rem;">
+                New here? Just enter your details and you'll be registered automatically.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const toasts = document.querySelectorAll('.toast');
+            toasts.forEach(t => setTimeout(() => t.remove(), 4500));
+        });
+    </script>
 </body>
+
 </html>

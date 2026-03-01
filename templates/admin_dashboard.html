@@ -1,49 +1,72 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Admin Dashboard</title>
-</head>
-<body>
-    <h2>Admin Dashboard</h2>
+{% extends "base.html" %}
 
-    <a href="/admin/event/add">Add New Event</a>
-    <br><br>
+{% block title %}Admin Dashboard — EventApp{% endblock %}
 
-    <table border="1" cellpadding="8">
-        <tr>
-            <th>Title</th>
-            <th>Category</th>
-            <th>Date & Time</th>
-            <th>Status</th>
-            <th>Actions</th>
-        </tr>
+{% block content %}
+<div class="main-content">
+    <div class="page-header">
+        <div class="flex justify-between items-center">
+            <div>
+                <h1>Admin Dashboard 📊</h1>
+                <p>Manage events, track participation</p>
+            </div>
+            <a href="{{ url_for('admin.add_event') }}" class="btn btn-primary">➕ Add Event</a>
+        </div>
+    </div>
 
-        {% for event in events %}
-        <tr>
-            <td>{{ event[1] }}</td>
-            <td>{{ event[2] }}</td>
-            <td>{{ event[3] }}</td>
-            <td>
-                {% if event[4] %}
-                    Active
-                {% else %}
-                    Deleted
-                {% endif %}
-            </td>
-            <td>
-                {% if event[4] %}
-                    <a href="/admin/event/edit/{{ event[0] }}">Edit</a>
-
-                    <form action="/admin/event/delete/{{ event[0] }}" method="POST" style="display:inline;">
-                        <button type="submit">Delete</button>
-                    </form>
-                {% endif %}
-            </td>
-        </tr>
-        {% endfor %}
+    {% if events %}
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Event</th>
+                <th>Category</th>
+                <th>Date &amp; Time</th>
+                <th>Participants</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for event in events %}
+            <tr>
+                <td style="font-weight:600;">{{ event[1] }}</td>
+                <td><span class="tag tag-category">{{ event[2] }}</span></td>
+                <td>{{ event[3].strftime('%b %d, %Y · %I:%M %p') }}</td>
+                <td>
+                    <span style="font-weight:600; color: var(--text-accent);">{{ event[5] }}</span>
+                    <span class="text-muted text-sm"> enrolled</span>
+                </td>
+                <td>
+                    {% if event[4] %}
+                    <span class="tag tag-active">Active</span>
+                    {% else %}
+                    <span class="tag tag-deleted">Deleted</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if event[4] %}
+                    <div class="flex gap-1">
+                        <a href="{{ url_for('admin.edit_event', event_id=event[0]) }}"
+                            class="btn btn-secondary btn-sm">✏️ Edit</a>
+                        <form action="{{ url_for('admin.delete_event', event_id=event[0]) }}" method="POST"
+                            style="display:inline;">
+                            <button type="submit" class="btn btn-danger btn-sm">🗑️ Delete</button>
+                        </form>
+                    </div>
+                    {% else %}
+                    <span class="text-muted text-sm">—</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
     </table>
-
-    <br>
-    <a href="/login">Logout</a>
-</body>
-</html>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-state-icon">📋</div>
+        <h3>No events yet</h3>
+        <p>Create your first event to get started!</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
