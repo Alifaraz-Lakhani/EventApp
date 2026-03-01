@@ -1,4 +1,5 @@
 from flask import Blueprint, session, redirect, url_for, jsonify
+from datetime import datetime, timezone
 from db import get_db_connection
 
 interest_bp = Blueprint("interest", __name__)
@@ -98,7 +99,6 @@ def recalculate():
         frequency_score = min(100, (freq / max(total, 1)) * 100)
 
         # Recency: higher if participated recently
-        from datetime import datetime, timezone
         if last_participation:
             days_ago = (datetime.now(timezone.utc) - last_participation.replace(tzinfo=timezone.utc)).days
             if days_ago <= 7:

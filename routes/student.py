@@ -122,20 +122,20 @@ def participate(event_id):
     cur.execute("""
         INSERT INTO participations (user_uid, event_id)
         VALUES (%s, %s)
-        ON CONFLICT DO NOTHING;
+        ON CONFLICT (user_uid, event_id) DO NOTHING;
     """, (session["uid"], event_id))
+    conn.commit()  # Commit participation first
 
-    # Update interest scores after participation (gracefully skip if table missing)
+    # Update interest scores (separate transaction so failure doesn't lose participation)
     try:
         cur.execute("SELECT category FROM events WHERE id = %s;", (event_id,))
         row = cur.fetchone()
         if row:
             category = row[0]
             _update_interest_score(cur, session["uid"], category)
+        conn.commit()
     except Exception:
-        conn.rollback()
-
-    conn.commit()
+        conn.rollback()  # Only rolls back the interest scoring, not the participation
     cur.close()
     conn.close()
 
@@ -196,13 +196,21 @@ def _update_interest_score(cur, user_uid, category):
         DO UPDATE SET score = EXCLUDED.score, updated_at = now();
     """, (user_uid, category, score))
 
-    # If score > 75, create a notification
+    # If score > 75, create a notification (dedup: one per category per day)
     if score > 75:
         cur.execute("""
-            INSERT INTO notifications (user_uid, title, message, type, is_read)
-            VALUES (%s, %s, %s, 'recommendation', FALSE);
-        """, (
-            user_uid,
-            f"🔥 High Interest: {category}",
-            f"Your interest score in {category} is {score}%! Check out recommended events."
-        ))
+            SELECT id FROM notifications
+            WHERE user_uid = %s AND type = 'recommendation'
+              AND title LIKE %s
+              AND created_at > now() - interval '1 day';
+        """, (user_uid, f"%{category}%"))
+
+        if not cur.fetchone():
+            cur.execute("""
+                INSERT INTO notifications (user_uid, title, message, type, is_read)
+                VALUES (%s, %s, %s, 'recommendation', FALSE);
+            """, (
+                user_uid,
+                f"High Interest: {category}",
+                f"Your interest score in {category} is {score}%! Check out recommended events."
+            ))

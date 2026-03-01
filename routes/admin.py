@@ -26,7 +26,7 @@ def admin_dashboard():
     cur.close()
     conn.close()
 
-    return render_template("admin_dashboard.html", events=events)
+    return render_template("admin_dashboard.html", events=events, notif_count=0)
 
 
 # Add event

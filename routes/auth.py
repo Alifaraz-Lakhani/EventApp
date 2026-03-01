@@ -6,10 +6,14 @@ auth_bp = Blueprint("auth", __name__)
 @auth_bp.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        uid_input = request.form.get("uid").strip()
-        name = request.form.get("name").strip()
-        email = request.form.get("email").strip()
-        phone = request.form.get("phone").strip()
+        uid_input = request.form.get("uid", "").strip()
+        name = request.form.get("name", "").strip()
+        email = request.form.get("email", "").strip()
+        phone = request.form.get("phone", "").strip()
+
+        if not uid_input or not name:
+            flash("UID and Name are required.", "error")
+            return render_template("login.html")
 
         # Decide role and internal UID
         if uid_input.isdigit():
