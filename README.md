@@ -248,5 +248,5 @@ This project is open source under the [MIT License](LICENSE).
 ---
 
 <p align="center">
-  Built with ⚡ by <a href="https://github.com/YOUR_USERNAME">Alifaraz Lakhani</a>
+  Built with ⚡ by <a href="https://github.com/Alifaraz-Lakhani">Alifaraz Lakhani</a>
 </p>
